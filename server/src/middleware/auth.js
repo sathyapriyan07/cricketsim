@@ -1,4 +1,8 @@
-﻿import { supabase } from "../config/supabase.js";
+import { supabase } from "../config/supabase.js";
+
+function normalizeRole(role) {
+  return String(role || "USER").toUpperCase();
+}
 
 export async function requireAuth(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -48,21 +52,23 @@ export async function requireAuth(req, res, next) {
     req.user = {
       id: authUser.id,
       email: authUser.email,
-      role: userProfile.role,
-      name: userProfile.name
+      role: normalizeRole(userProfile.role),
+      display_name: userProfile.name || authUser.user_metadata?.name || authUser.email?.split("@")[0] || "User"
     };
 
     return next();
-  } catch (err) {
+  } catch {
     return res.status(401).json({ error: "Unauthorized" });
   }
 }
 
 export function requireRole(...roles) {
+  const normalized = roles.map((role) => normalizeRole(role));
   return (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    if (!req.user || !normalized.includes(normalizeRole(req.user.role))) {
       return res.status(403).json({ error: "Forbidden" });
     }
     return next();
   };
 }
+

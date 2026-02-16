@@ -1,7 +1,9 @@
 import { supabase } from "../config/supabase.js";
 
-export async function listTeams() {
-  return supabase.from("teams").select("*").order("name");
+export async function listTeams(approvedOnly = null) {
+  let query = supabase.from("teams").select("*").order("name");
+  if (typeof approvedOnly === "boolean") query = query.eq("approved", approvedOnly);
+  return query;
 }
 
 export async function createTeam(input = {}, userRole = "USER") {
@@ -27,4 +29,3 @@ export async function updateTeam(teamId, input = {}) {
 export async function approveTeam(teamId) {
   return supabase.from("teams").update({ approved: true }).eq("id", teamId).select("*").single();
 }
-

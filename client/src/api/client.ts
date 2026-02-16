@@ -1,10 +1,17 @@
 import { supabase } from "lib/supabase";
+import { useAuthStore } from "store/useAuthStore";
 
 const API_URL = import.meta.env.VITE_API_URL || "/api";
 
-export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function resolveToken() {
+  const tokenFromStore = useAuthStore.getState().token;
+  if (tokenFromStore) return tokenFromStore;
   const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
+  return data.session?.access_token || null;
+}
+
+export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = await resolveToken();
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
   const response = await fetch(`${API_URL}${normalizedPath}`, {
@@ -15,6 +22,10 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     },
     ...options
   });
+
+  if (response.status === 401) {
+    useAuthStore.getState().clearAuth();
+  }
 
   if (!response.ok) {
     let detail = "";

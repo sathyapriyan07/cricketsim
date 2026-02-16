@@ -1,7 +1,7 @@
 ﻿import { Router } from "express";
 import { createCompetitionState, applyCompetitionMatchResult } from "../competition/competitionEngine.js";
 import { createMatchRecordFromResult, buildTeamNameMap } from "../competition/competitionHelpers.js";
-import { requireAuth, requireRole } from "../middleware/auth.js";
+import { requireAdmin, requireAuth, requireSuperAdmin } from "../middleware/authGuard.js";
 import { buildScorecard } from "../scorecard/scorecardBuilder.js";
 import { simulateOver } from "../simulation/engine.js";
 import { runPostMatchUpdates } from "../simulation/statUpdater.js";
@@ -137,7 +137,7 @@ competitionRouter.get("/", async (req, res) => {
   return res.json(data || []);
 });
 
-competitionRouter.post("/create", requireAuth, requireRole("ADMIN"), async (req, res) => {
+competitionRouter.post("/create", requireAuth, requireAdmin, async (req, res) => {
   try {
     const type = String(req.body.type || "").toLowerCase();
     const name = String(req.body.name || "").trim();
@@ -289,7 +289,7 @@ competitionRouter.post("/:id/play-match", requireAuth, async (req, res) => {
   }
 });
 
-competitionRouter.put("/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
+competitionRouter.put("/:id", requireAuth, requireAdmin, async (req, res) => {
   const payload = {
     ...(req.body.name ? { name: String(req.body.name).trim() } : {}),
     ...(req.body.status ? { status: req.body.status } : {}),
@@ -305,7 +305,7 @@ competitionRouter.put("/:id", requireAuth, requireRole("ADMIN"), async (req, res
   return res.json(data);
 });
 
-competitionRouter.delete("/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
+competitionRouter.delete("/:id", requireAuth, requireSuperAdmin, async (req, res) => {
   const { error } = await supabase.from("competitions").delete().eq("id", req.params.id);
   if (error) return res.status(400).json({ error: error.message });
   return res.status(204).send();

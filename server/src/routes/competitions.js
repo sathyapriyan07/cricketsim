@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { supabase } from "../config/supabase.js";
 import { createCompetitionState } from "../competition/competitionEngine.js";
-import { requireAuth, requireRole } from "../middleware/auth.js";
+import { requireAdmin, requireAuth, requireSuperAdmin } from "../middleware/authGuard.js";
 
 export const competitionsRouter = Router();
 
@@ -24,7 +24,7 @@ competitionsRouter.get("/:id", async (req, res) => {
   return res.json(data);
 });
 
-competitionsRouter.post("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
+competitionsRouter.post("/", requireAuth, requireAdmin, async (req, res) => {
   try {
     const type = String(req.body.type || "").toLowerCase();
     const name = String(req.body.name || "").trim();
@@ -69,7 +69,7 @@ competitionsRouter.post("/", requireAuth, requireRole("ADMIN"), async (req, res)
   }
 });
 
-competitionsRouter.put("/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
+competitionsRouter.put("/:id", requireAuth, requireAdmin, async (req, res) => {
   const payload = {
     ...(req.body.name ? { name: String(req.body.name).trim() } : {}),
     ...(req.body.type ? { type: String(req.body.type).toLowerCase() } : {}),
@@ -95,7 +95,7 @@ competitionsRouter.put("/:id", requireAuth, requireRole("ADMIN"), async (req, re
   return res.json(data);
 });
 
-competitionsRouter.delete("/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
+competitionsRouter.delete("/:id", requireAuth, requireSuperAdmin, async (req, res) => {
   const { error } = await supabase.from("competitions").delete().eq("id", req.params.id);
   if (error) return res.status(400).json({ error: error.message });
   return res.status(204).send();
