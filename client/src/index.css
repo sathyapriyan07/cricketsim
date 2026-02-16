@@ -1,0 +1,55 @@
+﻿@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply min-h-screen bg-gray-50 font-sans text-gray-900 antialiased leading-tight tracking-tight;
+}
+
+.glass {
+  @apply rounded-xl border border-gray-200 bg-white p-4 shadow-sm;
+}
+
+@layer components {
+  .input-clean {
+    @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100;
+  }
+
+  .btn-primary {
+    @apply rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300;
+  }
+
+  .btn-secondary {
+    @apply rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50;
+  }
+
+  .table-clean {
+    @apply min-w-full text-sm text-gray-800;
+  }
+
+  .table-clean thead tr {
+    @apply sticky top-0 bg-white text-sm text-gray-600;
+  }
+
+  .table-clean th {
+    @apply border-b border-gray-200 px-3 py-2 text-left font-semibold;
+  }
+
+  .table-clean td {
+    @apply border-b border-gray-100 px-3 py-2;
+  }
+
+  .table-clean tbody tr:nth-child(even) {
+    @apply bg-gray-50;
+  }
+
+  .table-clean tbody tr:hover {
+    @apply bg-gray-100;
+  }
+}
