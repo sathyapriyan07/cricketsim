@@ -1,12 +1,13 @@
-﻿import { supabase } from "lib/supabase";
+import { supabase } from "lib/supabase";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(`${API_URL}${normalizedPath}`, {
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -28,3 +29,4 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 
   return response.json() as Promise<T>;
 }
+
